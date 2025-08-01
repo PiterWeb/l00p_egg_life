@@ -47,7 +47,7 @@ let controls state =
 let drawing state =
   let open Raylib in
     (* Start Canvas *)
-    draw_model state.player_model state.player_position 1.0 Color.black;
+    draw_model state.player_model state.player_position 0.02 Color.white;
     draw_grid 20 10.0
     (* End Canvas *)
 
@@ -65,14 +65,14 @@ let rec loop state =
       loop state
 
 let () =
-  let player_model = Raylib.load_model "/assets/Chicken/Chicken_01.obj" in
   let camera = Raylib.Camera3D.create
       (Raylib.Vector3.create 10.0 10.0 10.0)
-      (Raylib.Vector3.create 4.0 0.0 2.0)
+      (Raylib.Vector3.create 0.0 0.0 0.0)
       (Raylib.Vector3.create 0.0 1.0 0.0)
       45.0
       Raylib.CameraProjection.Perspective in
-    let player_position = Raylib.Vector3.create 4.0 0.0 2.0 in
+    let player_position = Raylib.Vector3.create 0.0 0.0 0.0 in
     let player_speed = Raylib.Vector3.create player_base_speed 0.0 player_base_speed in
       setup ();
+    let player_model = Raylib.load_model "./assets/Chicken/Chicken_01.obj" in
       loop {camera; player_position; player_model; player_speed}
