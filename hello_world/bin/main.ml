@@ -27,14 +27,26 @@ let full_screen_handler () =
     | false -> set_window_size (get_monitor_width display) (get_monitor_height display));
     toggle_fullscreen ()
 
+let draw_speed_bar player_speed =
+  let open Raylib in
+  (* Draw the background of the progress bar *)
+  let width = 400 in
+  let height = 20 in
+  let position_x = 20 in
+  let position_y = 10 in
+  draw_rectangle position_x position_y width height Color.gray;
+  (* Draw the progress *)
+  let progress_width = int_of_float (float_of_int width *. player_speed /. player_base_speed) in
+  draw_rectangle position_x position_y progress_width height Color.green;
+  (* Draw the border *)
+  draw_rectangle_lines position_x position_y width height Color.black
+
 let controls state =
   let open Raylib in
     let x = Vector2.x state.player_position in
     let y = Vector2.y state.player_position in
     let speed = match state.player_speed.contents with
-      | speed when speed <= player_min_speed || speed >= player_base_speed -> (
-        player_base_speed
-      )
+      | speed when speed <= player_min_speed || speed >= player_base_speed -> player_base_speed
       | speed -> speed
     in
     let delta_time = get_frame_time() in
@@ -57,8 +69,7 @@ let controls state =
       Vector2.set_y state.player_position (y +. player_speed *. delta_time)
     );
     if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
-      state.player_speed := (1.5 *. speed -. player_acceleration *. delta_time);
-      state.player_speed := (1.5 *. speed -. player_acceleration *. delta_time);
+      state.player_speed := (speed -. player_acceleration *. delta_time);
     );
     state
 
@@ -72,6 +83,11 @@ let drawing state =
     draw_grid 20 10.0
     (* End Canvas *)
 
+let gui state =
+  (* Start Gui *)
+  draw_speed_bar state.player_speed.contents
+  (* End Gui *)
+
 let rec loop state =
   if Raylib.window_should_close () then Raylib.close_window ()
   else
@@ -83,6 +99,7 @@ let rec loop state =
       let state = controls state in
       drawing state;
       end_mode_3d ();
+      gui state;
       end_drawing ();
       loop state
 
