@@ -6,11 +6,17 @@ let window_setup () =
   Raylib.set_target_fps 60;
   Raylib.toggle_fullscreen ()
 
+type player_form =
+  | Egg
+  | Chick
+  | Hen
+
 type state = {
   player_position: Raylib.Vector2.t;
   player_speed: float ref;
   player_model: Raylib.Model.t;
   player_angle: float ref;
+  player_form: player_form ref;
   camera: Raylib.Camera3D.t;
 }
 
@@ -40,6 +46,22 @@ let draw_speed_bar player_speed =
   draw_rectangle position_x position_y progress_width height Color.green;
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.black
+
+let draw_objective form =
+  let open Raylib in
+  let objective_text = match form with 
+  | Egg -> "Start jour journey"
+  | Chick -> "Grow up and become a hen"
+  | Hen -> "Lay your own egg" in
+  let position_x = 20 in
+  let position_y = 40 in
+  draw_text objective_text position_x position_y 18 Color.black
+
+let gui state =
+  (* Start Gui *)
+  draw_speed_bar state.player_speed.contents;
+  draw_objective state.player_form.contents
+  (* End Gui *)
 
 let controls state =
   let open Raylib in
@@ -83,11 +105,6 @@ let drawing state =
     draw_grid 20 10.0
     (* End Canvas *)
 
-let gui state =
-  (* Start Gui *)
-  draw_speed_bar state.player_speed.contents
-  (* End Gui *)
-
 let rec loop state =
   if Raylib.window_should_close () then Raylib.close_window ()
   else
@@ -111,8 +128,11 @@ let () =
     (Raylib.Vector3.create 0.0 0.5 1.0)
     27.5
     Raylib.CameraProjection.Orthographic in
+  let _ = Egg in
+  let _ = Chick in
+  let player_form = Hen in
   let player_position = Raylib.Vector2.create 0.0 0.0 in
   let player_speed = player_base_speed in
   let player_angle = 0.0 in
   let player_model = Raylib.load_model "./assets/hen.glb" in
-  loop {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle}
+  loop {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form}
