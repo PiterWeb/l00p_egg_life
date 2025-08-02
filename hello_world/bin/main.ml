@@ -4,8 +4,7 @@ let window_height = 450
 let window_setup () =
   Raylib.init_window window_width window_height "lOOp RedCube";
   Raylib.set_target_fps 60;
-  Raylib.toggle_fullscreen ();
-  Raylib.hide_cursor ()
+  Raylib.toggle_fullscreen () |> Raylib.hide_cursor
 
 type player_form =
   | Egg
@@ -53,7 +52,7 @@ let draw_speed_bar player_speed =
   let position_y = 10 in
   draw_rectangle position_x position_y width height Color.gray;
   (* Draw the progress *)
-  let progress_width = int_of_float (float_of_int width *. player_speed /. player_base_speed) in
+  let progress_width = int_of_float @@ float_of_int width *. player_speed /. player_base_speed in
   draw_rectangle position_x position_y progress_width height Color.green;
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.black
@@ -88,25 +87,26 @@ let controls state =
     if is_key_down Key.A then (
       state.player_angle := 90.0;
       Vector2.set_x state.player_position (x +. player_speed *. delta_time);
-      update_camera_pro (addr state.camera) (Vector3.create 0.0 (-.player_speed *. delta_time) 0.0) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if is_key_down Key.D then (
       state.player_angle := 270.0;
       Vector2.set_x state.player_position (x -. player_speed *. delta_time);
-      update_camera_pro (addr state.camera) (Vector3.create 0.0 (player_speed *. delta_time) 0.0) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if is_key_down Key.S then (
       state.player_angle := 180.0;
       Vector2.set_y state.player_position (y -. player_speed *. delta_time);
-      update_camera_pro (addr state.camera) (Vector3.create 0.0 0.0 (-.player_speed *. delta_time)) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if is_key_down Key.W then (
       state.player_angle := 0.0;
       Vector2.set_y state.player_position (y +. player_speed *. delta_time);
-      update_camera_pro (addr state.camera) (Vector3.create 0.0 0.0 (player_speed *. delta_time)) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
       state.player_speed := (speed -. player_acceleration *. delta_time);
+    ) else (
+      Camera3D.set_target state.camera (Vector3.create (Vector2.x state.player_position) 0.0 (Vector2.y state.player_position));
+      Camera3D.set_position state.camera (Vector3.create (Vector2.x state.player_position) 10.0 (Vector2.y state.player_position));
+      (* let camera_position_text = Printf.sprintf "camera position - x:%f y:%f z:%f\n" (Vector3.x @@ Camera3D.position state.camera) (Vector3.y @@ Camera3D.position state.camera) (Vector3.z @@ Camera3D.position state.camera) in
+      trace_log 3 camera_position_text; *)
     );
     state
 
