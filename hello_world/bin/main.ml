@@ -4,7 +4,8 @@ let window_height = 450
 let window_setup () =
   Raylib.init_window window_width window_height "lOOp RedCube";
   Raylib.set_target_fps 60;
-  Raylib.toggle_fullscreen ()
+  Raylib.toggle_fullscreen ();
+  Raylib.hide_cursor ()
 
 type player_form =
   | Egg
@@ -23,6 +24,16 @@ type state = {
 let player_min_speed = 1.0
 let player_base_speed = 25.0
 let player_acceleration = -3.0
+
+(* let change_model state form =
+  let open Raylib in
+  unload_model state.player_model;
+  let model_path = "./assets/" ^ (match form with
+    | Egg -> "egg"
+    | Chick -> "chick"
+    | Hen -> "hen"
+  ) ^ ".glb" in
+  load_model model_path *)
 
 let full_screen_handler () =
   let open Raylib in
@@ -49,13 +60,13 @@ let draw_speed_bar player_speed =
 
 let draw_objective font form =
   let open Raylib in
-  let objective_text = match form with 
+  let objective_text = match form with
   | Egg -> "Start jour journey"
   | Chick -> "Grow up and become a hen"
   | Hen -> "Lay your own egg" in
-  let position_x = 20 in
-  let position_y = 40 in
-  draw_text_ex font objective_text (Vector2.create (float_of_int position_x) (float_of_int position_y)) 24.0 0.0 Color.black
+  let position_x = 20.0 in
+  let position_y = 40.0 in
+  draw_text_ex font objective_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
 
 let gui font state =
   (* Start Gui *)
@@ -76,19 +87,23 @@ let controls state =
     state.player_speed := player_speed;
     if is_key_down Key.A then (
       state.player_angle := 90.0;
-      Vector2.set_x state.player_position (x +. player_speed *. delta_time)
+      Vector2.set_x state.player_position (x +. player_speed *. delta_time);
+      update_camera_pro (addr state.camera) (Vector3.create 0.0 (-.player_speed *. delta_time) 0.0) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if is_key_down Key.D then (
       state.player_angle := 270.0;
-      Vector2.set_x state.player_position (x -. player_speed *. delta_time)
+      Vector2.set_x state.player_position (x -. player_speed *. delta_time);
+      update_camera_pro (addr state.camera) (Vector3.create 0.0 (player_speed *. delta_time) 0.0) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if is_key_down Key.S then (
       state.player_angle := 180.0;
-      Vector2.set_y state.player_position (y -. player_speed *. delta_time)
+      Vector2.set_y state.player_position (y -. player_speed *. delta_time);
+      update_camera_pro (addr state.camera) (Vector3.create 0.0 0.0 (-.player_speed *. delta_time)) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if is_key_down Key.W then (
       state.player_angle := 0.0;
-      Vector2.set_y state.player_position (y +. player_speed *. delta_time)
+      Vector2.set_y state.player_position (y +. player_speed *. delta_time);
+      update_camera_pro (addr state.camera) (Vector3.create 0.0 0.0 (player_speed *. delta_time)) (Vector3.create 0.0 0.0 0.0) 1.0
     );
     if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
       state.player_speed := (speed -. player_acceleration *. delta_time);
@@ -125,7 +140,7 @@ let () =
   let camera = Raylib.Camera3D.create
     (Raylib.Vector3.create 0.0 10.0 0.0)
     (Raylib.Vector3.create 0.0 0.0 0.0)
-    (Raylib.Vector3.create 0.0 0.5 1.0)
+    (Raylib.Vector3.create 0.0 0.0 1.0)
     27.5
     Raylib.CameraProjection.Orthographic in
   let _ = Egg in
@@ -136,4 +151,5 @@ let () =
   let player_angle = 0.0 in
   let player_model = Raylib.load_model "./assets/hen.glb" in
   let font = Raylib.load_font "./assets/open-sans.bold-italic.ttf" in
-  loop font {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form}
+  let state = {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form} in
+  loop font state
