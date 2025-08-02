@@ -22,9 +22,10 @@ type state = {
   camera: Camera3D.t;
 }
 
-(* type enviroment = {
-  grass_model: Model.t
-} *)
+type enviroment = {
+  grass_model: Model.t;
+  grass_positions: bool array array;
+}
 
 let player_min_speed = 1.0
 let player_base_speed = 25.0
@@ -111,16 +112,24 @@ let controls state =
   );
   state
 
-let drawing state =
+let drawing enviroment state =
   (* Start Canvas *)
   let x = Vector2.x state.player_position in
   let y = Vector2.y state.player_position in
-  let _ = state.player_angle in
   draw_model_ex state.player_model (Vector3.create x 0.0 y) (Vector3.create 0.0 1.0 0.0) state.player_angle.contents (Vector3.create 0.06 0.06 0.06) Color.white;
-  draw_grid 20 10.0
+  draw_grid 20 10.0;
+  let grass_scale = 35.0 in
+  let grass_possible_pos = (Array.length enviroment.grass_positions / 2) - 1 in
+  for x_cord = 0 to grass_possible_pos * 2  do
+    for y_cord = 0 to grass_possible_pos * 2 do
+      if enviroment.grass_positions.(x_cord).(y_cord) then 
+        draw_model enviroment.grass_model (Vector3.create (float_of_int @@ (x_cord - grass_possible_pos) * 5) 0.0 (float_of_int @@ (y_cord -grass_possible_pos) * 5)) grass_scale Color.white
+    done
+  done
+  
   (* End Canvas *)
 
-let rec loop font state =
+let rec loop font enviroment state =
   if window_should_close () then close_window ()
   else
     full_screen_handler ();
@@ -128,11 +137,11 @@ let rec loop font state =
     clear_background Color.raywhite;
     begin_mode_3d state.camera;
     let state = controls state in
-    drawing state;
+    drawing enviroment state;
     end_mode_3d ();
     gui font state;
     end_drawing ();
-    loop font state
+    loop font enviroment state
 
 let () =
   window_setup ();
@@ -150,6 +159,8 @@ let () =
   let player_angle = 0.0 in
   let player_model = load_model "./assets/hen.glb" in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
-  (* let grass_model = load_model "./assets/grass.glb" in *)
   let state = {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form} in
-  loop font state
+  let grass_model = load_model "./assets/grass.glb" in
+  let grass_positions = Array.init 100 (fun _ -> Array.init 100 (fun _ -> Random.int @@ 10 = 0)) in
+  let enviroment = {grass_model; grass_positions} in
+  loop font enviroment state
