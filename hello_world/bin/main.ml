@@ -47,7 +47,7 @@ let draw_speed_bar player_speed =
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.black
 
-let draw_objective form =
+let draw_objective font form =
   let open Raylib in
   let objective_text = match form with 
   | Egg -> "Start jour journey"
@@ -55,12 +55,12 @@ let draw_objective form =
   | Hen -> "Lay your own egg" in
   let position_x = 20 in
   let position_y = 40 in
-  draw_text objective_text position_x position_y 18 Color.black
+  draw_text_ex font objective_text (Vector2.create (float_of_int position_x) (float_of_int position_y)) 24.0 0.0 Color.black
 
-let gui state =
+let gui font state =
   (* Start Gui *)
   draw_speed_bar state.player_speed.contents;
-  draw_objective state.player_form.contents
+  draw_objective font state.player_form.contents
   (* End Gui *)
 
 let controls state =
@@ -105,7 +105,7 @@ let drawing state =
     draw_grid 20 10.0
     (* End Canvas *)
 
-let rec loop state =
+let rec loop font state =
   if Raylib.window_should_close () then Raylib.close_window ()
   else
     let open Raylib in
@@ -116,9 +116,9 @@ let rec loop state =
       let state = controls state in
       drawing state;
       end_mode_3d ();
-      gui state;
+      gui font state;
       end_drawing ();
-      loop state
+      loop font state
 
 let () =
   window_setup ();
@@ -135,4 +135,5 @@ let () =
   let player_speed = player_base_speed in
   let player_angle = 0.0 in
   let player_model = Raylib.load_model "./assets/hen.glb" in
-  loop {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form}
+  let font = Raylib.load_font "./assets/open-sans.bold-italic.ttf" in
+  loop font {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form}
