@@ -1,14 +1,6 @@
 open Raylib
 open Hello_world
 
-let window_width = 800
-let window_height = 450
-
-let window_setup () =
-  init_window window_width window_height "lOOp RedCube";
-  set_target_fps 60;
-  toggle_fullscreen () |> hide_cursor
-
 type player_form =
   | Egg
   | Chick
@@ -62,7 +54,7 @@ let draw_speed_bar player_speed =
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.black
 
-let draw_objective font (form: Player.player_form) =
+let draw_objective font form =
   let objective_text = match form with
   | Egg -> "Start jour journey"
   | Chick -> "Grow up and become a hen"
@@ -71,7 +63,7 @@ let draw_objective font (form: Player.player_form) =
   let position_y = 40.0 in
   draw_text_ex font objective_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
 
-let gui font (state: State.state) =
+let gui font state =
   (* Start Gui *)
   draw_speed_bar state.player_speed.contents;
   draw_objective font state.player_form.contents
@@ -137,7 +129,7 @@ let rec loop font enviroment state =
     begin_drawing ();
     clear_background Color.raywhite;
     begin_mode_3d state.camera;
-    let state = Player.controls state in
+    let state = controls state in
     drawing enviroment state;
     end_mode_3d ();
     gui font state;
