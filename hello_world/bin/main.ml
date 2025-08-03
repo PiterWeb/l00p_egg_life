@@ -1,4 +1,5 @@
 open Raylib
+open Hello_world
 
 let window_width = 800
 let window_height = 450
@@ -44,7 +45,7 @@ let full_screen_handler () =
   if is_key_pressed Key.F11 then
     let display = get_current_monitor () in
     (match is_window_fullscreen () with
-    | true -> set_window_size window_width window_height
+    | true -> set_window_size Window.width Window.height
     | false -> set_window_size (get_monitor_width display) (get_monitor_height display));
     toggle_fullscreen ()
 
@@ -61,7 +62,7 @@ let draw_speed_bar player_speed =
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.black
 
-let draw_objective font form =
+let draw_objective font (form: Player.player_form) =
   let objective_text = match form with
   | Egg -> "Start jour journey"
   | Chick -> "Grow up and become a hen"
@@ -70,7 +71,7 @@ let draw_objective font form =
   let position_y = 40.0 in
   draw_text_ex font objective_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
 
-let gui font state =
+let gui font (state: State.state) =
   (* Start Gui *)
   draw_speed_bar state.player_speed.contents;
   draw_objective font state.player_form.contents
@@ -136,7 +137,7 @@ let rec loop font enviroment state =
     begin_drawing ();
     clear_background Color.raywhite;
     begin_mode_3d state.camera;
-    let state = controls state in
+    let state = Player.controls state in
     drawing enviroment state;
     end_mode_3d ();
     gui font state;
@@ -144,7 +145,7 @@ let rec loop font enviroment state =
     loop font enviroment state
 
 let () =
-  window_setup ();
+  Window.setup ();
   let camera = Camera3D.create
     (Vector3.create 0.0 10.0 0.0)
     (Vector3.create 0.0 0.0 0.0)
