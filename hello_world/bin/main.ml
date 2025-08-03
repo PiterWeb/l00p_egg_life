@@ -15,15 +15,6 @@ type state = {
   camera: Camera3D.t;
 }
 
-type enviroment = {
-  grass_model: Model.t;
-  grass_positions: bool array array;
-}
-
-let player_min_speed = 1.0
-let player_base_speed = 25.0
-let player_acceleration = -3.0
-
 (* let change_model state form =
   unload_model state.player_model;
   let model_path = "./assets/" ^ (match form with
@@ -49,7 +40,7 @@ let draw_speed_bar player_speed =
   let position_y = 10 in
   draw_rectangle position_x position_y width height Color.gray;
   (* Draw the progress *)
-  let progress_width = int_of_float @@ float_of_int width *. player_speed /. player_base_speed in
+  let progress_width = int_of_float @@ float_of_int width *. player_speed /. Player.player_base_speed in
   draw_rectangle position_x position_y progress_width height Color.green;
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.black
@@ -73,11 +64,11 @@ let controls state =
   let x = Vector2.x state.player_position in
   let y = Vector2.y state.player_position in
   let speed = match state.player_speed.contents with
-    | speed when speed <= player_min_speed || speed >= player_base_speed -> player_base_speed
+    | speed when speed <= Player.player_min_speed || speed >= Player.player_base_speed -> Player.player_base_speed
     | speed -> speed
   in
   let delta_time = get_frame_time() in
-  let player_speed = speed +. player_acceleration *. delta_time in
+  let player_speed = speed +. Player.player_acceleration *. delta_time in
   state.player_speed := player_speed;
   if is_key_down Key.A then (
     state.player_angle := 90.0;
@@ -96,7 +87,7 @@ let controls state =
     Vector2.set_y state.player_position (y +. player_speed *. delta_time);
   );
   if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
-    state.player_speed := (speed -. player_acceleration *. delta_time);
+    state.player_speed := (speed -. Player.player_acceleration *. delta_time);
   ) else (
     Camera3D.set_target state.camera (Vector3.create (Vector2.x state.player_position) 0.0 (Vector2.y state.player_position));
     Camera3D.set_position state.camera (Vector3.create (Vector2.x state.player_position) 10.0 (Vector2.y state.player_position));
@@ -105,20 +96,16 @@ let controls state =
   );
   state
 
-let drawing enviroment state =
+let drawing (enviroment: Enviroment.enviroment) state =
   (* Start Canvas *)
   let x = Vector2.x state.player_position in
   let y = Vector2.y state.player_position in
   draw_model_ex state.player_model (Vector3.create x 0.0 y) (Vector3.create 0.0 1.0 0.0) state.player_angle.contents (Vector3.create 0.06 0.06 0.06) Color.white;
   draw_grid 20 10.0;
-  let grass_scale = 35.0 in
-  let grass_possible_pos = (Array.length enviroment.grass_positions / 2) - 1 in
-  for x_cord = 0 to grass_possible_pos * 2  do
-    for y_cord = 0 to grass_possible_pos * 2 do
-      if enviroment.grass_positions.(x_cord).(y_cord) then 
-        draw_model enviroment.grass_model (Vector3.create (float_of_int @@ (x_cord - grass_possible_pos) * 5) 0.0 (float_of_int @@ (y_cord -grass_possible_pos) * 5)) grass_scale Color.white
-    done
-  done
+  let grass_scale = 35.0 in 
+  Array.iter (fun g -> 
+    draw_model enviroment.grass_model (Vector3.create (Vector2.x g) 0.0 (Vector2.y g)) grass_scale Color.white
+  ) enviroment.grass_positions
   
   (* End Canvas *)
 
@@ -148,12 +135,10 @@ let () =
   let _ = Chick in
   let player_form = Hen in
   let player_position = Vector2.create 0.0 0.0 in
-  let player_speed = player_base_speed in
+  let player_speed = Player.player_base_speed in
   let player_angle = 0.0 in
   let player_model = load_model "./assets/hen.glb" in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
   let state = {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form} in
-  let grass_model = load_model "./assets/grass.glb" in
-  let grass_positions = Array.init 100 (fun _ -> Array.init 100 (fun _ -> Random.int @@ 10 = 0)) in
-  let enviroment = {grass_model; grass_positions} in
+  let enviroment: Enviroment.enviroment = Enviroment.get_grass () in
   loop font enviroment state
