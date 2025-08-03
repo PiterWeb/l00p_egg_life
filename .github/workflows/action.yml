@@ -13,7 +13,6 @@ jobs:
       fail-fast: true
       matrix:
         os:
-          - ubuntu-latest
           - windows-latest
 
     runs-on: ${{ matrix.os }}
