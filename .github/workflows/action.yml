@@ -28,7 +28,7 @@ jobs:
       
       - run: cd hello_world && opam install dune
 
-      - run: cd hello_world && opam install . --deps-only --with-test
+      - run: cd hello_world && opam install raylib
 
       - run: cd hello_world && opam exec -- dune build
       
