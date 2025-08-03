@@ -5,6 +5,11 @@ type enviroment = {
   grass_positions: Vector2.t array;
 }
 
+let touching_grass pos enviroment =
+  match Array.find_index (fun g -> Vector2.distance pos g <= 2.0) enviroment.grass_positions with
+    | Some(gi) -> (gi, true)
+    | None -> (0, false)
+
 let get_grass _ = 
   let grass_model = load_model "./assets/grass.glb" in
   let grass_marqued_max_num = 50 in
@@ -15,12 +20,13 @@ let get_grass _ =
   let index = ref 0 in
   for x_cord = 0 to grass_possible_pos_count * 2  do
     for y_cord = 0 to grass_possible_pos_count * 2 do
-      if List.nth (List.nth grass_marqued_positions x_cord) y_cord then 
+      if List.nth (List.nth grass_marqued_positions x_cord) y_cord then ( 
         let pos_x = (float_of_int @@ (x_cord - grass_possible_pos_count) * 5) in
         let pos_y = (float_of_int @@ (y_cord - grass_possible_pos_count) * 5) in
         Vector2.set_x grass_positions.(index.contents) pos_x;
         Vector2.set_y grass_positions.(index.contents) pos_y;
         index := index.contents + 1
+      )
     done
   done;
   (* let text = Printf.sprintf "grass_count - %d\n" grass_count in

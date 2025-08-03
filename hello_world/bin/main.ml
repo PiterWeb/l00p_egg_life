@@ -91,6 +91,12 @@ let controls state =
   ) else (
     Camera3D.set_target state.camera (Vector3.create (Vector2.x state.player_position) 0.0 (Vector2.y state.player_position));
     Camera3D.set_position state.camera (Vector3.create (Vector2.x state.player_position) 10.0 (Vector2.y state.player_position));
+    match Map.is_outside_map state.player_position with
+      | true -> (
+        Vector2.set_x state.player_position x;
+        Vector2.set_y state.player_position y
+      )
+      | false -> ()
     (* let camera_position_text = Printf.sprintf "camera position - x:%f y:%f z:%f\n" (Vector3.x @@ Camera3D.position state.camera) (Vector3.y @@ Camera3D.position state.camera) (Vector3.z @@ Camera3D.position state.camera) in
     trace_log 3 camera_position_text; *)
   );
@@ -101,8 +107,13 @@ let drawing (enviroment: Enviroment.enviroment) state =
   let x = Vector2.x state.player_position in
   let y = Vector2.y state.player_position in
   draw_model_ex state.player_model (Vector3.create x 0.0 y) (Vector3.create 0.0 1.0 0.0) state.player_angle.contents (Vector3.create 0.06 0.06 0.06) Color.white;
-  draw_grid 20 10.0;
-  let grass_scale = 35.0 in 
+  draw_plane (Vector3.create 0.0 0.0 0.0) (Vector2.create 250.0 250.0) Color.brown;
+  let grass_scale = 35.0 in
+  match Enviroment.touching_grass state.player_position enviroment with
+    | (g_index, true) -> 
+      Vector2.set_x enviroment.grass_positions.(g_index) 260.0;
+      Vector2.set_y enviroment.grass_positions.(g_index) 260.0
+    | _ -> ();
   Array.iter (fun g -> 
     draw_model enviroment.grass_model (Vector3.create (Vector2.x g) 0.0 (Vector2.y g)) grass_scale Color.white
   ) enviroment.grass_positions

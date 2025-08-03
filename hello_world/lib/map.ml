@@ -1,6 +1,6 @@
 open Raylib
 
-let map_max_limit = 50.0
+let map_max_limit = 100.0
 let map_min_limit = -.map_max_limit
 
 let is_outside_map pos =
