@@ -6,12 +6,17 @@ type player_form =
   | Chick
   | Hen
 
-type state = {
+type player_state = {
   player_position: Vector2.t;
   player_speed: float ref;
   player_model: Model.t;
   player_angle: float ref;
   player_form: player_form ref;
+}
+
+type state = {
+  player_state: player_state;
+  grass_count: int ref;
   camera: Camera3D.t;
 }
 
@@ -52,49 +57,58 @@ let draw_objective font form =
   | Hen -> "Lay your own egg" in
   let position_x = 20.0 in
   let position_y = 40.0 in
-  draw_text_ex font objective_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
+  draw_text_ex font ("Objective: " ^ objective_text) (Vector2.create position_x position_y) 24.0 0.0 Color.black
+
+let draw_grass_count font count =
+  let count_text = "Grass: " ^ Int.to_string count in
+  let position_x = 20.0 in
+  let position_y = 50.0 in
+  draw_text_ex font count_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
 
 let gui font state =
   (* Start Gui *)
-  draw_speed_bar state.player_speed.contents;
-  draw_objective font state.player_form.contents
+  draw_speed_bar state.player_state.player_speed.contents;
+  draw_objective font state.player_state.player_form.contents;
+  draw_grass_count font state.grass_count.contents
   (* End Gui *)
 
 let controls state =
-  let x = Vector2.x state.player_position in
-  let y = Vector2.y state.player_position in
-  let speed = match state.player_speed.contents with
+  let player_state = state.player_state in
+  let x = Vector2.x player_state.player_position in
+  let y = Vector2.y player_state.player_position in
+  let speed = match player_state.player_speed.contents with
     | speed when speed <= Player.player_min_speed || speed >= Player.player_base_speed -> Player.player_base_speed
     | speed -> speed
   in
   let delta_time = get_frame_time() in
   let player_speed = speed +. Player.player_acceleration *. delta_time in
-  state.player_speed := player_speed;
+  player_state.player_speed := player_speed;
   if is_key_down Key.A then (
-    state.player_angle := 90.0;
-    Vector2.set_x state.player_position (x +. player_speed *. delta_time);
+    player_state.player_angle := 90.0;
+    Vector2.set_x player_state.player_position (x +. player_speed *. delta_time);
   );
   if is_key_down Key.D then (
-    state.player_angle := 270.0;
-    Vector2.set_x state.player_position (x -. player_speed *. delta_time);
+    player_state.player_angle := 270.0;
+    Vector2.set_x state.player_state.player_position (x -. player_speed *. delta_time);
   );
   if is_key_down Key.S then (
-    state.player_angle := 180.0;
-    Vector2.set_y state.player_position (y -. player_speed *. delta_time);
+    player_state.player_angle := 180.0;
+    Vector2.set_y player_state.player_position (y -. player_speed *. delta_time);
   );
   if is_key_down Key.W then (
-    state.player_angle := 0.0;
-    Vector2.set_y state.player_position (y +. player_speed *. delta_time);
+    player_state.player_angle := 0.0;
+    Vector2.set_y player_state.player_position (y +. player_speed *. delta_time);
   );
   if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
-    state.player_speed := (speed -. Player.player_acceleration *. delta_time);
+    player_state.player_speed := (speed -. Player.player_acceleration *. delta_time);
   ) else (
-    Camera3D.set_target state.camera (Vector3.create (Vector2.x state.player_position) 0.0 (Vector2.y state.player_position));
-    Camera3D.set_position state.camera (Vector3.create (Vector2.x state.player_position) 10.0 (Vector2.y state.player_position));
-    match Map.is_outside_map state.player_position with
+    Camera3D.set_target state.camera (Vector3.create (Vector2.x player_state.player_position) 0.0 (Vector2.y player_state.player_position));
+    Camera3D.set_position state.camera (Vector3.create (Vector2.x player_state.player_position) 10.0 (Vector2.y player_state.player_position));
+    match Map.is_outside_map player_state.player_position with
       | true -> (
-        Vector2.set_x state.player_position x;
-        Vector2.set_y state.player_position y
+        Vector2.set_x player_state.player_position x;
+        Vector2.set_y player_state.player_position y;
+        state.grass_count := state.grass_count.contents + 1;
       )
       | false -> ()
     (* let camera_position_text = Printf.sprintf "camera position - x:%f y:%f z:%f\n" (Vector3.x @@ Camera3D.position state.camera) (Vector3.y @@ Camera3D.position state.camera) (Vector3.z @@ Camera3D.position state.camera) in
@@ -128,7 +142,7 @@ let rec loop font enviroment state =
     clear_background Color.raywhite;
     begin_mode_3d state.camera;
     let state = controls state in
-    drawing enviroment state;
+    drawing enviroment state.player_state;
     end_mode_3d ();
     gui font state;
     end_drawing ();
@@ -149,7 +163,9 @@ let () =
   let player_speed = Player.player_base_speed in
   let player_angle = 0.0 in
   let player_model = load_model "./assets/hen.glb" in
+  let grass_count = 0 in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
-  let state = {camera; player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form} in
+  let player_state = {player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form} in
+  let state = {camera;  grass_count = ref grass_count; player_state} in
   let enviroment: Enviroment.enviroment = Enviroment.get_grass () in
   loop font enviroment state
