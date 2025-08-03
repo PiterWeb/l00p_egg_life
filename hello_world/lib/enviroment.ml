@@ -3,6 +3,7 @@ open Raylib
 type enviroment = {
   grass_model: Model.t;
   grass_positions: Vector2.t array;
+  grass_eat_count: int ref;
 }
 
 let touching_grass pos enviroment =
@@ -35,4 +36,5 @@ let get_grass _ =
     let text = Printf.sprintf "Grass %d x:%f - y:%f\n" i (Vector2.x g) (Vector2.y g) in
     trace_log 3 text
   ) grass_positions; *)
-  {grass_model; grass_positions} 
+  let grass_eat_count = -10 in
+  {grass_model; grass_positions; grass_eat_count = ref grass_eat_count} 

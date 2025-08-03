@@ -4,6 +4,6 @@ let width = 800
 let height = 450
 
 let setup () =
-  init_window width height "lOOp RedCube";
+  init_window width height "lOOp Egg life";
   set_target_fps 60;
   toggle_fullscreen () |> hide_cursor

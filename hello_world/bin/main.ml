@@ -16,7 +16,6 @@ type player_state = {
 
 type state = {
   player_state: player_state;
-  grass_count: int ref;
   camera: Camera3D.t;
 }
 
@@ -62,14 +61,14 @@ let draw_objective font form =
 let draw_grass_count font count =
   let count_text = "Grass: " ^ Int.to_string count in
   let position_x = 20.0 in
-  let position_y = 50.0 in
+  let position_y = 70.0 in
   draw_text_ex font count_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
 
-let gui font state =
+let gui font (enviroment: Enviroment.enviroment) state =
   (* Start Gui *)
   draw_speed_bar state.player_state.player_speed.contents;
   draw_objective font state.player_state.player_form.contents;
-  draw_grass_count font state.grass_count.contents
+  draw_grass_count font enviroment.grass_eat_count.contents
   (* End Gui *)
 
 let controls state =
@@ -108,7 +107,6 @@ let controls state =
       | true -> (
         Vector2.set_x player_state.player_position x;
         Vector2.set_y player_state.player_position y;
-        state.grass_count := state.grass_count.contents + 1;
       )
       | false -> ()
     (* let camera_position_text = Printf.sprintf "camera position - x:%f y:%f z:%f\n" (Vector3.x @@ Camera3D.position state.camera) (Vector3.y @@ Camera3D.position state.camera) (Vector3.z @@ Camera3D.position state.camera) in
@@ -126,7 +124,8 @@ let drawing (enviroment: Enviroment.enviroment) state =
   match Enviroment.touching_grass state.player_position enviroment with
     | (g_index, true) -> 
       Vector2.set_x enviroment.grass_positions.(g_index) 260.0;
-      Vector2.set_y enviroment.grass_positions.(g_index) 260.0
+      Vector2.set_y enviroment.grass_positions.(g_index) 260.0;
+      enviroment.grass_eat_count := enviroment.grass_eat_count.contents + 1
     | _ -> ();
   Array.iter (fun g -> 
     draw_model enviroment.grass_model (Vector3.create (Vector2.x g) 0.0 (Vector2.y g)) grass_scale Color.white
@@ -144,7 +143,7 @@ let rec loop font enviroment state =
     let state = controls state in
     drawing enviroment state.player_state;
     end_mode_3d ();
-    gui font state;
+    gui font enviroment state;
     end_drawing ();
     loop font enviroment state
 
@@ -163,9 +162,8 @@ let () =
   let player_speed = Player.player_base_speed in
   let player_angle = 0.0 in
   let player_model = load_model "./assets/hen.glb" in
-  let grass_count = 0 in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
   let player_state = {player_position; player_model; player_speed = ref player_speed; player_angle = ref player_angle; player_form = ref player_form} in
-  let state = {camera;  grass_count = ref grass_count; player_state} in
+  let state = {camera; player_state} in
   let enviroment: Enviroment.enviroment = Enviroment.get_grass () in
   loop font enviroment state
