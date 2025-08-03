@@ -25,14 +25,12 @@ jobs:
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: 5
-
-      - run: cd hello_world
       
-      - run: opam install dune
+      - run: cd hello_world && opam install dune
 
-      - run: opam install . --deps-only --with-test
+      - run: cd hello_world && opam install . --deps-only --with-test
 
-      - run: opam exec -- dune build
+      - run: cd hello_world && opam exec -- dune build
       
       - name: Upload release
         uses: softprops/action-gh-release@v1
