@@ -1,5 +1,5 @@
 open Raylib
-open Hello_world
+open Game
 
 type player_form =
   | Egg

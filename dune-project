@@ -1,25 +1,25 @@
 (lang dune 3.19)
 
-(name hello_world)
+(name game)
 
 (generate_opam_files true)
 
 (source
  (github username/reponame))
 
-(authors "Author Name <author@example.com>")
+(authors "PiterDev <piterzdev@gmail.com>")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "PiterDev <piterzdev@gmail.com>")
 
-(license LICENSE)
+(license MIT)
 
 (documentation https://url/to/documentation)
 
 (package
- (name hello_world)
+ (name game)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml)
+ (depends ocaml raylib)
  (tags
   ("add topics" "to describe" your project)))
 

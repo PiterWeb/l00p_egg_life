@@ -1,6 +1,6 @@
-# gmtk-2025
+# l00p egg life
 
-https://itch.io/jam/gmtk-2025
+https://piterweb.itch.io/l00p-egg-life
 
 ## Mentions
 

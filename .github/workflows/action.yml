@@ -26,14 +26,14 @@ jobs:
         with:
           ocaml-compiler: 5
       
-      - run: cd hello_world && opam install dune
+      - run: opam install dune
 
-      - run: cd hello_world && opam install raylib
+      - run: opam install raylib
 
-      - run: cd hello_world && opam exec -- dune build
+      - run: opam exec -- dune build
       
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
           files:
-            hello_world/_build/default/bin/*
+            _build/default/bin/*
