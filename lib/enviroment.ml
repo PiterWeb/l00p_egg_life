@@ -11,6 +11,9 @@ let touching_grass pos enviroment =
     | Some(gi) -> (gi, true)
     | None -> (0, false)
 
+let load_grass_texture _ =
+  load_texture "./assets/map.png"
+
 let get_grass _ = 
   let grass_model = load_model "./assets/grass.glb" in
   let grass_marqued_max_num = 50 in
@@ -36,5 +39,5 @@ let get_grass _ =
     let text = Printf.sprintf "Grass %d x:%f - y:%f\n" i (Vector2.x g) (Vector2.y g) in
     trace_log 3 text
   ) grass_positions; *)
-  let grass_eat_count = -10 in
+  let grass_eat_count = 0 in
   {grass_model; grass_positions; grass_eat_count = ref grass_eat_count} 
