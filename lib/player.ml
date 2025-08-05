@@ -19,9 +19,9 @@ type player_state = {
   player_form: player_form ref;
 }
 
-let player_min_speed = 1.0
-let player_base_speed = 25.0
-let player_acceleration = -3.0
+let player_min_speed = 16.0
+let player_base_speed = 75.0
+let player_acceleration = -9.0
 
 let load_chicken_texture _ =
   load_texture "./assets/chicken_white.png"

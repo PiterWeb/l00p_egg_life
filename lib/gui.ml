@@ -11,7 +11,7 @@ let draw_speed_bar player_speed =
   let progress_width = int_of_float @@ float_of_int width *. player_speed /. Player.player_base_speed in
   draw_rectangle position_x position_y progress_width height Color.green;
   (* Draw the border *)
-  draw_rectangle_lines position_x position_y width height Color.black
+  draw_rectangle_lines position_x position_y width height Color.gray
 
 let draw_objective font (form: Player.player_form) =
   let objective_text = match form with
@@ -20,15 +20,15 @@ let draw_objective font (form: Player.player_form) =
   | Hen -> "Lay your own egg" in
   let position_x = 20.0 in
   let position_y = 40.0 in
-  draw_text_ex font ("Objective: " ^ objective_text) (Vector2.create position_x position_y) 24.0 0.0 Color.black
+  draw_text_ex font ("Objective: " ^ objective_text) (Vector2.create position_x position_y) 24.0 0.0 Color.white
 
 let draw_grass_count font count =
   let count_text = "Grass: " ^ Int.to_string count in
   let position_x = 20.0 in
   let position_y = 70.0 in
-  draw_text_ex font count_text (Vector2.create position_x position_y) 24.0 0.0 Color.black
+  draw_text_ex font count_text (Vector2.create position_x position_y) 24.0 0.0 Color.white
 
-let draw_gui font (enviroment: Enviroment.enviroment) (state: Player.player_state) =
+let draw_gui font (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Gui *)
   draw_speed_bar state.player_speed.contents;
   draw_objective font state.player_form.contents;

@@ -36,19 +36,19 @@ let controls state =
   player_state.player_speed := player_speed;
   if is_key_down Key.A then (
     player_state.player_direction := Left;
-    Vector2.set_x player_state.player_position (x +. player_speed *. delta_time);
+    Vector2.set_x player_state.player_position (x -. player_speed *. delta_time);
   );
   if is_key_down Key.D then (
     player_state.player_direction := Right;
-    Vector2.set_x state.player_state.player_position (x -. player_speed *. delta_time);
+    Vector2.set_x state.player_state.player_position (x +. player_speed *. delta_time);
   );
   if is_key_down Key.S then (
     player_state.player_direction := Front;
-    Vector2.set_y player_state.player_position (y -. player_speed *. delta_time);
+    Vector2.set_y player_state.player_position (y +. player_speed *. delta_time);
   );
   if is_key_down Key.W then (
     player_state.player_direction := Back;
-    Vector2.set_y player_state.player_position (y +. player_speed *. delta_time);
+    Vector2.set_y player_state.player_position (y -. player_speed *. delta_time);
   );
   if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
     player_state.player_speed := (speed -. Player.player_acceleration *. delta_time);
@@ -65,32 +65,27 @@ let controls state =
   );
   state
 
-let drawing (_enviroment: Enviroment.enviroment) (state: Player.player_state) =
+let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
+  (* Start Canvas *)  
   let (texture, position) = (state.player_texture, state.player_position) in
-  match state.player_direction.contents with
+  (match state.player_direction.contents with
   | Left -> Player.draw_chicken_left texture position
   | Right -> Player.draw_chicken_right texture position
   | Front -> Player.draw_chicken_front texture position
-  | Back -> Player.draw_chicken_back texture position
-  (* Start Canvas *)
-  (* let x = Vector2.x state.player_position in
-  let y = Vector2.y state.player_position in
-  draw_model_ex state.player_model (Vector3.create x 0.0 y) (Vector3.create 0.0 1.0 0.0) state.player_angle.contents (Vector3.create 0.06 0.06 0.06) Color.white; *)
-  
-  (* draw_plane (Vector3.create 0.0 0.0 0.0) (Vector2.create 250.0 250.0) Color.brown;
-  let grass_scale = 35.0 in
-  match Enviroment.touching_grass state.player_position enviroment with
+  | Back -> Player.draw_chicken_back texture position);
+  (match Map.touching_grass state.player_position enviroment with
     | (g_index, true) -> 
       Vector2.set_x enviroment.grass_positions.(g_index) 260.0;
       Vector2.set_y enviroment.grass_positions.(g_index) 260.0;
       enviroment.grass_eat_count := enviroment.grass_eat_count.contents + 1
-    | _ -> ();
-  Array.iter (fun g -> 
-    draw_model enviroment.grass_model (Vector3.create (Vector2.x g) 0.0 (Vector2.y g)) grass_scale Color.white
-  ) enviroment.grass_positions *)
-  
+    | _ -> ());
+  Array.iter (fun g_pos -> 
+    let y_cord = Vector2.y g_pos in  
+    if y_cord < -24.0 || y_cord > 24.0 then 
+    Map.draw_grass enviroment.map_texture g_pos
+  ) enviroment.grass_positions
   (* End Canvas *)
-
+  
 let rec loop font enviroment state =
   if window_should_close () then close_window ()
   else
@@ -126,5 +121,5 @@ let () =
   let player_texture = Player.load_chicken_texture () in
   let player_state: Player.player_state = {player_position; player_speed = ref player_speed; player_direction = ref player_direction; player_form = ref player_form; player_texture} in
   let state = {camera; player_state} in
-  let enviroment = Enviroment.get_grass () in
+  let enviroment = Map.init_enviroment () in
   loop font enviroment state
