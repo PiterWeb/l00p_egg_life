@@ -43,11 +43,12 @@ let get_grass_calc _ =
   let grass_count = Utils.count_if (fun g -> g) grass_marqued_positions in 
   let grass_positions = Array.init grass_count (fun _ -> Vector2.create 0.0 0.0) in
   let index = ref 0 in
+  let separation_between_grass = 16 in
   for x_cord = 0 to grass_possible_pos_count * 2  do
     for y_cord = 0 to grass_possible_pos_count * 2 do
       if List.nth (List.nth grass_marqued_positions x_cord) y_cord then ( 
-        let pos_x = (float_of_int @@ (x_cord - grass_possible_pos_count) * 5) in
-        let pos_y = (float_of_int @@ (y_cord - grass_possible_pos_count) * 5) in
+        let pos_x = (float_of_int @@ (x_cord - grass_possible_pos_count) * separation_between_grass) in
+        let pos_y = (float_of_int @@ (y_cord - grass_possible_pos_count) * separation_between_grass) in
         if pos_y > 16.0 || pos_y < -16.0 then (
           Vector2.set_x grass_positions.(index.contents) pos_x;
           Vector2.set_y grass_positions.(index.contents) pos_y;

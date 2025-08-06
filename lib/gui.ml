@@ -32,5 +32,6 @@ let draw_gui font (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Gui *)
   draw_speed_bar state.player_speed.contents;
   draw_objective font state.player_form.contents;
-  draw_grass_count font enviroment.grass_eat_count.contents
+  draw_grass_count font enviroment.grass_eat_count.contents;
+  (* draw_fps 100 20 *)
   (* End Gui *)
