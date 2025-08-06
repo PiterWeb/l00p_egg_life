@@ -13,10 +13,10 @@ type player_direction =
 
 type player_state = {
   player_position: Vector2.t;
-  player_speed: float ref;
+  mutable player_speed: float;
   player_texture: Texture2D.t;
-  player_direction: player_direction ref;
-  player_form: player_form ref;
+  mutable player_direction: player_direction;
+  mutable player_form: player_form;
 }
 
 let player_min_speed = 16.0

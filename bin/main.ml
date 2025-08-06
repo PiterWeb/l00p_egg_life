@@ -27,31 +27,31 @@ let controls state =
   let player_state = state.player_state in
   let x = Vector2.x player_state.player_position in
   let y = Vector2.y player_state.player_position in
-  let speed = match player_state.player_speed.contents with
+  let speed = match player_state.player_speed with
     | speed when speed <= Player.player_min_speed || speed >= Player.player_base_speed -> Player.player_base_speed
     | speed -> speed
   in
   let delta_time = get_frame_time() in
   let player_speed = speed +. Player.player_acceleration *. delta_time in
-  player_state.player_speed := player_speed;
+  player_state.player_speed <- player_speed;
   if is_key_down Key.A then (
-    player_state.player_direction := Left;
+    player_state.player_direction <- Left;
     Vector2.set_x player_state.player_position (x -. player_speed *. delta_time);
   );
   if is_key_down Key.D then (
-    player_state.player_direction := Right;
+    player_state.player_direction <- Right;
     Vector2.set_x state.player_state.player_position (x +. player_speed *. delta_time);
   );
   if is_key_down Key.S then (
-    player_state.player_direction := Front;
+    player_state.player_direction <- Front;
     Vector2.set_y player_state.player_position (y +. player_speed *. delta_time);
   );
   if is_key_down Key.W then (
-    player_state.player_direction := Back;
+    player_state.player_direction <- Back;
     Vector2.set_y player_state.player_position (y -. player_speed *. delta_time);
   );
   if not (is_key_down Key.W) && not (is_key_down Key.A) && not (is_key_down Key.S) && not (is_key_down Key.D) then (
-    player_state.player_speed := (speed -. Player.player_acceleration *. delta_time);
+    player_state.player_speed <- (speed -. Player.player_acceleration *. delta_time);
   ) else (
     Camera2D.set_target state.camera player_state.player_position;
     match Map.is_outside_map player_state.player_position with
@@ -68,7 +68,7 @@ let controls state =
 let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Canvas *)  
   let (texture, position) = (state.player_texture, state.player_position) in
-  (match state.player_direction.contents with
+  (match state.player_direction with
   | Left -> Player.draw_chicken_left texture position
   | Right -> Player.draw_chicken_right texture position
   | Front -> Player.draw_chicken_front texture position
@@ -77,7 +77,7 @@ let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
     | (g_index, true) -> 
       Vector2.set_x enviroment.grass_positions.(g_index) 260.0;
       Vector2.set_y enviroment.grass_positions.(g_index) 260.0;
-      enviroment.grass_eat_count := enviroment.grass_eat_count.contents + 1
+      enviroment.grass_eat_count <- enviroment.grass_eat_count + 1
     | _ -> ());
   Array.iter (fun g_pos -> 
     let y_cord = Vector2.y g_pos in  
@@ -119,7 +119,7 @@ let () =
   let player_direction = Player.Front in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
   let player_texture = Player.load_chicken_texture () in
-  let player_state: Player.player_state = {player_position; player_speed = ref player_speed; player_direction = ref player_direction; player_form = ref player_form; player_texture} in
+  let player_state: Player.player_state = {player_position; player_speed; player_direction; player_form; player_texture} in
   let state = {camera; player_state} in
   let enviroment = Map.init_enviroment () in
   loop font enviroment state

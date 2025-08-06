@@ -3,7 +3,7 @@ open Raylib
 type enviroment = {
   map_texture: Texture2D.t;
   grass_positions: Vector2.t array;
-  grass_eat_count: int ref;
+  mutable grass_eat_count: int;
 }
 
 let map_max_limit = 1_000.0
@@ -63,10 +63,10 @@ let get_grass_calc _ =
     let text = Printf.sprintf "Grass %d x:%f - y:%f\n" i (Vector2.x g) (Vector2.y g) in
     trace_log 3 text
   ) grass_positions; *)
-  let grass_eat_count = 0 in
-  (grass_positions, ref grass_eat_count) 
+  grass_positions
 
 let init_enviroment _ =
   let map_texture = load_map_texture () in
-  let (grass_positions, grass_eat_count) = get_grass_calc () in
+  let grass_positions = get_grass_calc () in
+  let grass_eat_count = 0 in
   {map_texture; grass_positions; grass_eat_count}
