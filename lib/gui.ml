@@ -8,7 +8,7 @@ let draw_speed_bar player_speed =
   let position_y = 10 in
   draw_rectangle position_x position_y width height Color.gray;
   (* Draw the progress *)
-  let progress_width = int_of_float @@ float_of_int width *. player_speed /. Player.player_base_speed in
+  let progress_width = int_of_float @@ float_of_int width *. (player_speed -. Player.player_min_speed) /. (Player.player_base_speed -. Player.player_min_speed) in
   draw_rectangle position_x position_y progress_width height Color.green;
   (* Draw the border *)
   draw_rectangle_lines position_x position_y width height Color.gray
@@ -33,5 +33,5 @@ let draw_gui font (enviroment: Map.enviroment) (state: Player.player_state) =
   draw_speed_bar state.player_speed;
   draw_objective font state.player_form;
   draw_grass_count font enviroment.grass_eat_count;
-  (* draw_fps 100 20 *)
+  draw_fps 20 100
   (* End Gui *)

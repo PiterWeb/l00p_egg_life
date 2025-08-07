@@ -79,11 +79,7 @@ let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
       Vector2.set_y enviroment.grass_positions.(g_index) 260.0;
       enviroment.grass_eat_count <- enviroment.grass_eat_count + 1
     | _ -> ());
-  Array.iter (fun g_pos -> 
-    let y_cord = Vector2.y g_pos in  
-    if y_cord < -24.0 || y_cord > 24.0 then 
-    Map.draw_grass enviroment.map_texture g_pos
-  ) enviroment.grass_positions
+  Map.draw_visible_grass enviroment.map_texture enviroment.grass_positions position
   (* End Canvas *)
   
 let rec loop font enviroment state =

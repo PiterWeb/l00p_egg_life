@@ -19,9 +19,9 @@ type player_state = {
   mutable player_form: player_form;
 }
 
-let player_min_speed = 16.0
-let player_base_speed = 75.0
-let player_acceleration = -9.0
+let player_min_speed = 32.0
+let player_base_speed = 72.0
+let player_acceleration = -8.0
 
 let load_chicken_texture _ =
   load_texture "./assets/chicken_white.png"
