@@ -28,7 +28,7 @@ let is_outside_map pos =
 let touching_grass pos enviroment =
   match Array.find_index (fun g -> 
     let y_cord = Vector2.y g in
-    (Vector2.distance pos g <= grass_hitbox)  && y_cord <> 0.0
+    (Vector2.distance pos g <= grass_hitbox) && y_cord <> 0.0
   ) enviroment.grass_positions with
     | Some(gi) -> (gi, true)
     | None -> (0, false)
