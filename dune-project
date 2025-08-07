@@ -19,7 +19,7 @@
  (name game)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml raylib)
+ (depends ocaml raylib miou)
  (tags
   ("add topics" "to describe" your project)))
 
