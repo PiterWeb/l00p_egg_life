@@ -60,19 +60,23 @@ let controls state =
         Vector2.set_y player_state.player_position y;
       )
       | false -> ()
-    (* let camera_position_text = Printf.sprintf "camera position - x:%f y:%f z:%f\n" (Vector3.x @@ Camera3D.position state.camera) (Vector3.y @@ Camera3D.position state.camera) (Vector3.z @@ Camera3D.position state.camera) in
-    trace_log 3 camera_position_text; *)
   );
   state
 
 let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Canvas *)  
   let (texture, position) = (state.player_texture, state.player_position) in
-  (match state.player_direction with
-  | Left -> Player.draw_chicken_left texture position
-  | Right -> Player.draw_chicken_right texture position
-  | Front -> Player.draw_chicken_front texture position
-  | Back -> Player.draw_chicken_back texture position);
+  (match state.player_form with
+    | Egg -> Player.draw_egg texture position
+    | Chick -> ()
+    | Hen -> (
+      match state.player_direction with
+      | Left -> Player.draw_chicken_left texture position
+      | Right -> Player.draw_chicken_right texture position
+      | Front -> Player.draw_chicken_front texture position
+      | Back -> Player.draw_chicken_back texture position
+    )
+  );
   (match Map.touching_grass state.player_position enviroment with
     | (g_index, true) -> 
       Vector2.set_x enviroment.grass_positions.(g_index) 260.0;
@@ -90,7 +94,10 @@ let rec loop font enviroment state =
     Camera2D.set_offset state.camera (Vector2.create (float_of_int @@ get_render_width () / 2) (float_of_int @@ get_render_height () / 2));
     begin_mode_2d state.camera;
     clear_background Color.brown;
-    let state = controls state in
+    let state = (match state.player_state.player_form with
+      | Egg -> state
+      | Chick -> state 
+      | Hen -> controls state) in
     (* begin_mode_3d state.camera; *)
     (* end_mode_3d (); *)
     drawing enviroment state.player_state;
@@ -107,14 +114,14 @@ let () =
     (Vector2.create 0.0 0.0)
     0.0
     2.5 in
-  let _ = Player.Egg in
+  let player_form = Player.Egg in
   let _ = Player.Chick in
-  let player_form = Player.Hen in
+  let _ = Player.Hen in
   let player_position = Vector2.create 0.0 0.0 in
   let player_speed = Player.player_base_speed in
   let player_direction = Player.Front in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
-  let player_texture = Player.load_chicken_texture () in
+  let player_texture = Player.load_egg_texture () in
   let player_state: Player.player_state = {player_position; player_speed; player_direction; player_form; player_texture} in
   let state = {camera; player_state} in
   let enviroment = Map.init_enviroment () in

@@ -37,3 +37,9 @@ let draw_chicken_left texture position =
 
 let draw_chicken_front texture position =
   draw_texture_rec texture (Rectangle.create 0.0 48.0 16.0 16.0) position Color.white
+
+let load_egg_texture _ =
+  load_texture "./assets/egg.png"
+
+let draw_egg texture position =
+  draw_texture_rec texture (Rectangle.create 0.0 0.0 32.0 32.0) position Color.white
