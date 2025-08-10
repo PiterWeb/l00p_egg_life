@@ -66,6 +66,13 @@ let controls state =
 let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Canvas *)
   let (texture, position) = (state.player_texture, state.player_position) in
+  let promise_touching_grass = Miou.async @@ fun () -> (match Map.touching_grass state.player_position enviroment with
+    | (g_index, true) -> 
+      Vector2.set_x enviroment.grass_positions.(g_index) 1_000.0;
+      Vector2.set_y enviroment.grass_positions.(g_index) 1_000.0;
+      enviroment.grass_eat_count <- enviroment.grass_eat_count + 1
+    | (_, false) -> ()) in
+  Map.draw_visible_terrain enviroment.map_texture position;
   let promise_draw_player = Miou.async @@ fun () -> (match state.player_form with
     | Egg -> Player.draw_egg texture position
     | Chick -> ()
@@ -77,12 +84,6 @@ let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
       | Back -> Player.draw_chicken_back texture position
     )
   ) in
-  let promise_touching_grass = Miou.async @@ fun () -> (match Map.touching_grass state.player_position enviroment with
-    | (g_index, true) -> 
-      Vector2.set_x enviroment.grass_positions.(g_index) 1_000.0;
-      Vector2.set_y enviroment.grass_positions.(g_index) 1_000.0;
-      enviroment.grass_eat_count <- enviroment.grass_eat_count + 1
-    | (_, false) -> ()) in
   Map.draw_visible_grass enviroment.map_texture enviroment.grass_positions position;
   ignore @@ Miou.await_all [promise_draw_player; promise_touching_grass]
   (* End Canvas *)
@@ -98,7 +99,7 @@ let rec loop font enviroment state =
     begin_drawing ();
     Camera2D.set_offset state.camera (Vector2.create (float_of_int @@ get_render_width () / 2) (float_of_int @@ get_render_height () / 2));
     begin_mode_2d state.camera;
-    clear_background Color.brown;
+    clear_background Color.white;
 
     drawing enviroment state.player_state;
     

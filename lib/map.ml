@@ -9,7 +9,7 @@ type enviroment = {
 let map_max_limit = 1_000.0
 let map_min_limit = -.map_max_limit
 
-let max_map_visible = lazy (get_render_width() |> float_of_int)
+let max_map_visible = lazy (float_of_int @@ get_render_width () )
 let max_player_distance = lazy(Lazy.force max_map_visible /. 2.0)
 
 let grass_hitbox = 14.0
@@ -39,6 +39,9 @@ let load_map_texture _ =
 let draw_grass texture position =
   draw_texture_rec texture (Rectangle.create 16.0 (5.0 *. 16.0) 16.0 16.0) position Color.white
 
+let draw_terrain texture position =
+  draw_texture_rec texture (Rectangle.create 80.0 (5.0 *. 16.0) 16.0 16.0) position Color.white
+
 let draw_visible_grass texture grass_positions player_position =
   let max_player_distance = Lazy.force max_player_distance in
   (* trace_log 3 (Printf.sprintf "Max_player_distance: %f" max_player_distance); *)
@@ -49,6 +52,25 @@ let draw_visible_grass texture grass_positions player_position =
       if distance <= max_player_distance then draw_grass texture g_pos
     )
   ) grass_positions
+
+let draw_visible_terrain texture player_position =
+  let max_player_distance = Lazy.force max_player_distance in
+  let max_x = int_of_float @@ Vector2.x player_position +. max_player_distance in 
+  let min_x = int_of_float @@ Vector2.x player_position -. max_player_distance in
+  let max_y = int_of_float @@ Vector2.y player_position +. max_player_distance in
+  let min_y = int_of_float @@ Vector2.y player_position -. max_player_distance in
+  for x =  min_x to max_x do
+    let x_divisible_by_16 = (x mod 16) = 0 in
+    if x_divisible_by_16 then (
+      for y = min_y to max_y do
+        let y_divisible_by_16 = (y mod 16) = 0 in
+        if y_divisible_by_16 then (
+          draw_terrain texture (Vector2.create (float_of_int x) (float_of_int y)) 
+        )
+      done
+    )
+  done
+
 
 let get_grass_calc _ = 
   let grass_marqued_max_num = 550 in
