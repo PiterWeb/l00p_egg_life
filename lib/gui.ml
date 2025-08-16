@@ -1,6 +1,6 @@
 open Raylib
 
-let draw_speed_bar player_speed =
+let draw_speed_bar ~player_speed =
   (* Draw the background of the progress bar *)
   let width = 400 in
   let height = 20 in
@@ -30,7 +30,7 @@ let draw_grass_count font count =
 
 let draw_gui font (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Gui *)
-  draw_speed_bar state.player_speed;
+  draw_speed_bar ~player_speed:state.player_speed;
   draw_objective font state.player_form;
   draw_grass_count font enviroment.grass_eat_count;
   draw_fps 20 100
