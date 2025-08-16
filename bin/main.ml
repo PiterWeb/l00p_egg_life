@@ -1,19 +1,27 @@
 open Raylib
 open Game
 
+type actions =
+  | ChangeTexture
+  | NoneAction
+
+type action = {
+  timeout: float;
+  action_id: actions;
+}
+
 type state = {
   player_state: Player.player_state;
   camera: Camera2D.t;
+  mutable action: action;
 }
 
-(* let change_model last_player_model form =
-  unload_model last_player_model;
-  let model_path = "./assets/" ^ (match form with
-    | Egg -> "egg"
-    | Chick -> "chick"
-    | Hen -> "hen"
-  ) ^ ".glb" in
-  load_model model_path *)
+let change_player_texture ~last_player_texture (form: Player.player_form) =
+  unload_texture last_player_texture;
+  match form with
+    | Egg -> Player.load_egg_texture()
+    | Chick -> Player.load_chick_texture()
+    | Hen -> Player.load_hen_texture()
 
 let full_screen_handler () =
   if is_key_pressed Key.F11 then
@@ -65,9 +73,11 @@ let controls state =
 
 let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   (* Start Canvas *)
+
   let (texture, position) = (state.player_texture, state.player_position) in
+
   let promise_touching_grass = Miou.async @@ fun () -> (match Map.touching_grass state.player_position enviroment with
-    | (g_index, true) -> 
+    | (g_index, true) ->
       Vector2.set_x enviroment.grass_positions.(g_index) 1_000.0;
       Vector2.set_y enviroment.grass_positions.(g_index) 1_000.0;
       enviroment.grass_eat_count <- enviroment.grass_eat_count + 1
@@ -75,7 +85,13 @@ let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   Map.draw_visible_terrain enviroment.map_texture position;
   let promise_draw_player = Miou.async @@ fun () -> (match state.player_form with
     | Egg -> Player.draw_egg texture position
-    | Chick -> ()
+    | Chick -> (
+      match state.player_direction with
+        | Left -> Player.draw_chick_right texture position
+        | Right -> Player.draw_chick_right texture position
+        | Front -> Player.draw_chick_right texture position
+        | Back -> Player.draw_chick_right texture position
+    )
     | Hen -> (
       match state.player_direction with
       | Left -> Player.draw_chicken_left texture position
@@ -87,14 +103,28 @@ let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   Map.draw_visible_grass enviroment.map_texture enviroment.grass_positions position;
   ignore @@ Miou.await_all [promise_draw_player; promise_touching_grass]
   (* End Canvas *)
-  
+
 let rec loop font enviroment state =
   if window_should_close () then close_window ()
   else
     full_screen_handler ();
     let promise_state = Miou.async @@ fun () -> (match state.player_state.player_form with
-      | Egg -> state
-      | Chick -> state 
+      | Egg -> (
+        if state.action.action_id = ChangeTexture && state.action.timeout <= Unix.time() then (
+          let chick_texture = change_player_texture ~last_player_texture:state.player_state.player_texture Player.Chick in
+          let player_state = {state.player_state with player_form = Player.Chick; player_texture = chick_texture} in
+          state.action <- {action_id = NoneAction; timeout = 0.0};  
+          {state with player_state}
+        ) else state
+      )
+      | Chick -> (
+        if state.action.action_id = ChangeTexture && state.action.timeout <= Unix.time() then (
+          let hen_texture = change_player_texture ~last_player_texture:state.player_state.player_texture Player.Hen in
+          let player_state = {state.player_state with player_form = Player.Chick; player_texture = hen_texture} in
+          state.action <- {action_id = NoneAction; timeout = 0.0};  
+          {state with player_state}
+        )else controls state
+      )      
       | Hen -> controls state) in
     begin_drawing ();
     Camera2D.set_offset state.camera (Vector2.create (float_of_int @@ get_render_width () / 2) (float_of_int @@ get_render_height () / 2));
@@ -102,7 +132,7 @@ let rec loop font enviroment state =
     clear_background Color.white;
 
     drawing enviroment state.player_state;
-    
+
     end_mode_2d ();
     Gui.draw_gui font enviroment state.player_state;
     end_drawing ();
@@ -117,15 +147,16 @@ let () = Miou.run @@ fun () ->
     (Vector2.create 0.0 0.0)
     0.0
     2.5 in
-  let _ = Player.Egg in
+  let _ = Player.Hen in
   let _ = Player.Chick in
-  let player_form = Player.Hen in
+  let player_form = Player.Egg in
   let player_position = Vector2.create 0.0 0.0 in
   let player_speed = Player.player_base_speed in
   let player_direction = Player.Front in
   let font = load_font "./assets/open-sans.bold-italic.ttf" in
-  let player_texture = Player.load_chicken_texture () in
+  let player_texture = Player.load_egg_texture () in
   let player_state: Player.player_state = {player_position; player_speed; player_direction; player_form; player_texture} in
-  let state = {camera; player_state} in
+  let action = {timeout = Unix.time() +. 3.0; action_id = ChangeTexture} in
+  let state = {camera; player_state; action} in
   let enviroment = Miou.await_exn promise_enviroment in
   loop font enviroment state
