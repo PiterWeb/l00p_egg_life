@@ -16,8 +16,8 @@ let draw_speed_bar ~player_speed =
 let draw_objective font (form: Player.player_form) =
   let objective_text = match form with
   | Egg -> "Start jour journey"
-  | Chick -> "Grow up and become a hen"
-  | Hen -> "Lay your own egg" in
+  | Chick -> "Get grass to grow up and become a hen"
+  | Hen -> "Search for a rooster to lay your own egg" in
   let position_x = 20.0 in
   let position_y = 40.0 in
   draw_text_ex font ("Objective: " ^ objective_text) (Vector2.create position_x position_y) 24.0 0.0 Color.white

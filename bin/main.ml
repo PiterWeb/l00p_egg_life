@@ -104,7 +104,7 @@ let drawing (enviroment: Map.enviroment) (state: Player.player_state) =
   ignore @@ Miou.await_all [promise_draw_player; promise_touching_grass]
   (* End Canvas *)
 
-let rec loop font enviroment state =
+let rec loop font (enviroment: Map.enviroment) state =
   if window_should_close () then close_window ()
   else
     full_screen_handler ();
@@ -118,14 +118,20 @@ let rec loop font enviroment state =
         ) else state
       )
       | Chick -> (
-        if state.action.action_id = ChangeTexture && state.action.timeout <= Unix.time() then (
+        if enviroment.grass_eat_count = Player.min_grass_for_hen then (
           let hen_texture = change_player_texture ~last_player_texture:state.player_state.player_texture Player.Hen in
-          let player_state = {state.player_state with player_form = Player.Chick; player_texture = hen_texture} in
+          let player_state = {state.player_state with player_form = Player.Hen; player_texture = hen_texture} in
+          {state with player_state}
+        ) else controls state
+      )      
+      | Hen -> 
+        if state.action.action_id = ChangeTexture && state.action.timeout <= Unix.time() then (
+          let egg_texture = change_player_texture ~last_player_texture:state.player_state.player_texture Player.Egg in
+          let player_state = {state.player_state with player_form = Player.Egg; player_texture = egg_texture} in
           state.action <- {action_id = NoneAction; timeout = 0.0};  
           {state with player_state}
-        )else controls state
-      )      
-      | Hen -> controls state) in
+        ) else controls state
+      ) in
     begin_drawing ();
     Camera2D.set_offset state.camera (Vector2.create (float_of_int @@ get_render_width () / 2) (float_of_int @@ get_render_height () / 2));
     begin_mode_2d state.camera;

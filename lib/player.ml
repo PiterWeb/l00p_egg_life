@@ -19,6 +19,8 @@ type player_state = {
   mutable player_form: player_form;
 }
 
+let min_grass_for_hen = 50
+
 let player_min_speed = 32.0
 let player_base_speed = 72.0
 let player_acceleration = -8.0
