@@ -4,6 +4,7 @@ type enviroment = {
   map_texture: Texture2D.t;
   grass_positions: Vector2.t array;
   mutable grass_eat_count: int;
+  mutable rooster_position: Vector2.t;
 }
 
 let map_max_limit = 1_000.0
@@ -101,8 +102,36 @@ let get_grass_calc _ =
   ) grass_positions; *)
   grass_positions
 
+let get_rooster_position _ =
+  let valid_coord coord = coord mod 16 = 0 in
+  let x_full_list = List.init (2 * (int_of_float map_max_limit)) (fun i -> i - ( int_of_float map_max_limit)) in
+  let x_posible_list = List.filter valid_coord x_full_list in
+  let y_posible_list = x_posible_list in
+  let x_list_pos = Random.int_in_range ~min:0 ~max:(List.length x_posible_list)  in
+  let y_list_pos = Random.int_in_range ~min:0 ~max:(List.length y_posible_list) in
+  let x = match List.nth_opt x_posible_list x_list_pos with
+    | None -> map_min_limit
+    | Some x -> float_of_int x
+  in
+  let y = match List.nth_opt y_posible_list y_list_pos with
+    | None -> map_max_limit
+    | Some y -> float_of_int y
+  in
+  Vector2.create x y
+
+let get_rooster_next_position ~actual_pos =
+  let direction =
+    Random.int_in_range ~min:1 ~max:4 in
+  match direction with
+    | 1 -> Vector2.add actual_pos (Vector2.create 1.0 0.0) 
+    | 2 -> Vector2.add actual_pos (Vector2.create (-1.0) 0.0) 
+    | 3 -> Vector2.add actual_pos (Vector2.create 0.0 1.0) 
+    | 4 -> Vector2.add actual_pos (Vector2.create 0.0 (-1.0)) 
+    | _ -> actual_pos
+
 let init_enviroment _ =
   let map_texture = load_map_texture () in
   let grass_positions = get_grass_calc () in
+  let rooster_position = get_rooster_position () in
   let grass_eat_count = 0 in
-  {map_texture; grass_positions; grass_eat_count}
+  {map_texture; grass_positions; grass_eat_count; rooster_position}

@@ -138,11 +138,12 @@ let rec loop font (enviroment: Map.enviroment) state =
     clear_background Color.white;
 
     drawing enviroment state.player_state;
-
     end_mode_2d ();
     Gui.draw_gui font enviroment state.player_state;
     end_drawing ();
     let state = Miou.await_exn promise_state in
+    let rooster_next_position = Map.get_rooster_next_position ~actual_pos:enviroment.rooster_position in
+    enviroment.rooster_position <- rooster_next_position;
     loop font enviroment state
 
 let () = Miou.run @@ fun () ->
