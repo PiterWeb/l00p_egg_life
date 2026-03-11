@@ -123,12 +123,12 @@ let rec loop font (enviroment: Map.enviroment) state =
           let player_state = {state.player_state with player_form = Player.Hen; player_texture = hen_texture} in
           {state with player_state}
         ) else controls state
-      )      
-      | Hen -> 
+      )
+      | Hen ->
         if state.action.action_id = ChangeTexture && state.action.timeout <= Unix.time() then (
           let egg_texture = change_player_texture ~last_player_texture:state.player_state.player_texture Player.Egg in
           let player_state = {state.player_state with player_form = Player.Egg; player_texture = egg_texture} in
-          state.action <- {action_id = NoneAction; timeout = 0.0};  
+          state.action <- {action_id = NoneAction; timeout = 0.0};
           {state with player_state}
         ) else controls state
       ) in
