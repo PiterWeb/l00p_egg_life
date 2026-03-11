@@ -47,11 +47,8 @@ let draw_visible_grass texture grass_positions player_position =
   let max_player_distance = Lazy.force max_player_distance in
   (* trace_log 3 (Printf.sprintf "Max_player_distance: %f" max_player_distance); *)
   Array.iter (fun g_pos ->
-    let y_cord = Vector2.y g_pos in  
-    if y_cord < -24.0 || y_cord > 24.0 then (
       let distance = Vector2.distance g_pos player_position in
-      if distance <= max_player_distance then draw_grass texture g_pos
-    )
+      if distance <= max_player_distance +. (2.0 *. grass_hitbox) then draw_grass texture g_pos
   ) grass_positions
 
 let draw_visible_terrain texture player_position =
