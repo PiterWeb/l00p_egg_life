@@ -12,7 +12,16 @@ https://piterweb.itch.io/l00p-egg-life
 To develop the game you need OCaml with dune
 
 ### How to build
+
+Install dependencies:
+
+```bash
+opam install dune
+opam install raylib
+opam install miou
 ```
+
+```bash
 dune build
 ```
 
@@ -20,7 +29,16 @@ The file will be located at _build/default/bin/main.exe
 To execute it you will need the assets folder in the directory
 
 ## How to develop
+
+Install dependencies:
+
+```bash
+opam install dune
+opam install raylib
+opam install miou
 ```
+
+```bash
 dune exec game
 ``` 
 
