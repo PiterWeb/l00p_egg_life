@@ -28,6 +28,8 @@ jobs:
       
       - run: opam install dune
 
+      - run: opam install miou
+
       - run: opam install raylib
 
       - run: opam exec -- dune build
